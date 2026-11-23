@@ -1,6 +1,6 @@
-# FestivalCrew 0.3.0 – Fokus-Ansicht
+# FestivalCrew 0.3.1 – Fokus-Ansicht
 
-Die mobile Festivalplanungs-Demo ist bewusst minimalistisch: dunkles Grau, klare Typografie, nur ein dezenter roter Akzent. **Unabhängiges Fan-Projekt, kein offizielles Wacken-Angebot.**
+Die mobile Festivalplanungs-Demo bleibt übersichtlich, wirkt aber wärmer: tiefes Anthrazit, cremefarbener Text, gedämpftes Kupferrot und ein sanfter Bühnenlicht-Schimmer statt vieler bunter Kacheln. **Unabhängiges Fan-Projekt, kein offizielles Wacken-Angebot.**
 
 ## Einfacher Aufbau
 

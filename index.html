@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0d0e10">
+<meta name="theme-color" content="#171112">
 <meta name="description" content="FestivalCrew – gemeinsam planen, einkaufen, packen und feiern.">
 <link rel="manifest" href="manifest.webmanifest">
 <title>FestivalCrew – Festivalplanung</title>
@@ -15,13 +15,14 @@
 @media(max-width:350px){.bottom-nav button{font-size:8px}.bottom-nav button .ico{font-size:16px}.metric b{font-size:14px}}
 </style>
 <link rel="stylesheet" href="./minimal.css?v=0.3.0">
+<link rel="stylesheet" href="./warm.css?v=0.3.1">
 </head>
 <body>
 <div class="app">
-<header class="header"><div class="mark" aria-hidden="true">FC</div><div class="headline"><div class="eyebrow">EURE FESTIVALPLANUNG</div><h1>FestivalCrew</h1></div><button class="icon-button" id="settingsBtn" aria-label="Einstellungen">☰</button></header>
+<header class="header"><div class="mark" aria-hidden="true">FC</div><div class="headline"><div class="eyebrow">DEINE CREW. DEIN FESTIVAL.</div><h1>FestivalCrew</h1></div><button class="icon-button" id="settingsBtn" aria-label="Einstellungen">☰</button></header>
 <section class="festival"><div><h2 id="festivalName">Wacken – Crew</h2><p id="festivalInfo">Deine Planung</p></div><span class="pill">Crew</span></section>
 <nav class="nav" id="desktopNav"></nav><main class="content" id="main"></main>
-<footer class="footer">FestivalCrew 0.3.0 · Lokale Testversion · Unabhängiges Projekt</footer>
+<footer class="footer">FestivalCrew 0.3.1 · Lokale Testversion · Unabhängiges Projekt</footer>
 <nav class="bottom-nav" id="mobileNav"></nav></div>
 <div id="dialog" class="hidden"></div>
 <script src="./receipt-tools.js?v=0.2.0"></script>
@@ -54,10 +55,10 @@ function home(){
  const d=state.festival,open=outstanding(),fund=ledgerStats().fund,total=open.buy+open.pack;
  const soon=[...state.timeline].filter(x=>x.start&&new Date(x.start)>=new Date()).sort((a,b)=>a.start.localeCompare(b.start))[0];
  const next=soon?soon.band+' · '+new Date(soon.start).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):null;
- return title('Übersicht','Nur das, was jetzt wichtig ist')+
+ return title('Übersicht','Alles für euer gemeinsames Festival')+
  '<div class="stack">'+
  `<section class="card overview-hero">
- <small>NOCH ZU ERLEDIGEN</small><strong>${total===0?'Alles im Blick':total+' offene Punkte'}</strong>
+ <small>EURE VORBEREITUNG</small><strong>${total===0?(state.shopping.length+state.packing.length?'Alles abgehakt':'Zeit für eure Planung'):'Noch '+total+' Dinge offen'}</strong>
  <p class="sub">${total===0?'Keine offenen Einträge in euren Listen.':(open.buy+' Einkäufe offen · '+open.pack+' Dinge noch nicht gepackt')}</p>
  <div class="overview-actions"><button type="button" class="action" data-modal="receipt">Bon scannen</button><button type="button" class="action secondary" data-tab="shop">Listen öffnen</button></div>
  </section>
@@ -66,7 +67,7 @@ function home(){
  <div class="slim-stat"><small>Packen offen</small><strong>${open.pack}</strong></div>
  <div class="slim-stat"><small>Festivalkasse</small><strong>${eur(fund)}</strong></div>
  </div>
- <section class="card"><h3>Als Nächstes</h3><div class="task-links">
+ <section class="card"><h3>Was steht an?</h3><div class="task-links">
  <button type="button" class="task-link" data-tab="shop"><span><b>Einkäufe prüfen</b><small>${open.buy?open.buy+' noch nicht vollständig gekauft':'Alles auf der Liste abgehakt'}</small></span><span class="arrow" aria-hidden="true">›</span></button>
  <button type="button" class="task-link" data-tab="pack"><span><b>Packliste prüfen</b><small>${open.pack?open.pack+' noch nicht gepackt':'Alles eingepackt'}</small></span><span class="arrow" aria-hidden="true">›</span></button>
  <button type="button" class="task-link" data-tab="lineup"><span><b>Festivalplan</b><small>${next?esc(next):'Noch keine kommenden Auftritte geplant'}</small></span><span class="arrow" aria-hidden="true">›</span></button>
@@ -80,7 +81,7 @@ function shop(){
  const open=state.shopping.filter(x=>!x.bought).length,bought=state.shopping.filter(x=>x.bought).length;
  const visible=state.shopping.filter(x=>listView==='all'||(listView==='bought'?x.bought:!x.bought));
  const status=x=>x.bought?'Gekauft':n(x.boughtQty)>0?n(x.boughtQty)+' / '+n(x.qty)+' gekauft':'Offen';
- return title('Listen','Einkäufe und Ausrüstung an einem Ort')+sectionTabs('lists')+`<div class="stack">
+ return title('Listen','Gemeinsam einkaufen und packen')+sectionTabs('lists')+`<div class="stack">
  <div class="card">
  <div class="section-line"><div><h3>Einkaufsliste</h3><div class="small muted">${open} offen · ${bought} erledigt</div></div>
  <button type="button" class="action secondary" data-modal="receipt">Bon scannen</button></div>
@@ -186,7 +187,7 @@ function money(){
 const tval=x=>x?.replace('T',' ')||'';
 function lineup(){
  const sorted=[...state.timeline].sort((a,b)=>(a.start||'').localeCompare(b.start||''));
- return title('Festival','Timeline und Crew-Absprachen')+sectionTabs('festival')+`<div class="stack">
+ return title('Festival','Eure Bands und Absprachen')+sectionTabs('festival')+`<div class="stack">
  <div class="card"><div class="section-line"><h3>Eure Konzertplanung</h3><span class="small muted">${sorted.length} Termine</span></div>
  ${sorted.length?sorted.map(x=>{
   const overlaps=sorted.filter(y=>y.id!==x.id&&y.start&&x.start&&y.start<x.end&&x.start<y.end);
@@ -309,7 +310,7 @@ function modal(type){if(type==='member'){dialog(`<div class="row between"><h2>�
  <button class="action secondary" id="exportBtn">Daten sichern</button>
  <label class="ghost" style="text-align:center;cursor:pointer">Sicherung importieren<input type="file" id="importInput" accept="application/json,.json" class="hidden"></label>
  </div>
- <p class="mobile-note">FestivalCrew Version 0.3.0 · lokale Vorschau</p>
+ <p class="mobile-note">FestivalCrew Version 0.3.1 · lokale Vorschau</p>
  <button class="danger" id="resetBtn">Lokale Daten zurücksetzen</button>
  </div>`)} else if(type==='receipt'){receiptModal()} }
 

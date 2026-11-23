@@ -1,12 +1,12 @@
 {
   "name": "FestivalCrew – Festivalplanung",
   "short_name": "FestivalCrew",
-  "description": "Einkäufe, Packliste, Kasse und Festivalplan an einem Ort",
+  "description": "Gemeinsam planen, einkaufen, packen und feiern",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#0d0e10",
-  "theme_color": "#0d0e10",
+  "background_color": "#171213",
+  "theme_color": "#171112",
   "icons": [
     {
       "src": "icon.svg",
