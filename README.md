@@ -1,27 +1,38 @@
-# FestivalCrew – Web-Demo v0.1.0 🤘
+# 🤘 FestivalCrew Web – Rock Edition v0.2.0
 
-Dies ist die öffentliche, installierbare Web-Demo der FestivalCrew-App. **Das Repository enthält ausschließlich Frontend-Dateien** und ist nicht die zentrale Datenbank.
+Die öffentliche, installierbare Demo für Festivalplanung mit Einkaufsliste, Festivalkasse, Packliste, Band-Timeline und lokalem Gruppenchat. FestivalCrew ist **kein offizielles Wacken-Produkt**.
 
-## Die Demo starten
+## 📱 Öffnen
 
-Sobald GitHub Pages aktiviert ist: https://rasha9311-cyber.github.io/FestivalCrew-Web/
+https://rasha9311-cyber.github.io/FestivalCrew-Web/
 
-GitHub Pages aktivieren: Settings → Pages → Build and deployment → Deploy from a branch → main → /(root) → Save.
+Updates erscheinen automatisch über GitHub Actions und GitHub Pages. Bei alter Anzeige die Seite neu laden.
 
-## Funktionen der Demo
+## 🧾 Kassenbon-Scanner
 
-- Festivalgruppe verwalten
-- Gemeinsame Einkaufsliste
-- Gruppenkasse mit Kostenaufteilung und Festivalkasse
-- Packliste
-- Festival-Timeline
-- Chat-Vorschau
-- Kassenbon-Fotoimport / Texterkennung (Browser-Bibliothek wird online geladen)
+- Foto aufnehmen oder aus Galerie wählen
+- Browser-Texterkennung mit Tesseract.js (Bibliothek und Sprachdaten werden über CDN geladen)
+- Positionen mit Artikelnamen, Mengen, Preisen und vorgeschlagenen Listen-Zuordnungen erkennen
+- **Vor dem Speichern** alle Positionen kontrollieren und manuell korrigieren
+- Neu gekaufte Artikel zur Einkaufsliste hinzufügen oder bestehende Artikel als gekauft / teilweise gekauft markieren
+- Den Betrag als Ausgabe der Festivalkasse buchen, auf ausgewählte Personen aufteilen oder lediglich archivieren
+- Originalfoto und erkannte Positionen auf diesem Gerät speichern
 
-## Wichtig: Demo – keine Mehrgeräte-Synchronisierung
+OCR-Erkennung ist heuristisch und kann Positionen, Pfand, Rabatte oder Beträge falsch lesen. Es werden keine Kartendaten automatisch extrahiert oder geprüft.
 
-Alle eingegebenen Daten werden in dieser Version **nur im Browser des jeweiligen Geräts** gespeichert. Es gibt **keine Benutzerkonten, keinen echten Gruppenchat, keine Cloud-Synchronisierung** und keine Anbindung an die offizielle Wacken-App. Andere Personen können deine lokal gespeicherten Daten nicht aus diesem Repository abrufen. Lokal gespeicherte Daten können beim Löschen der Browserdaten verloren gehen.
+## 💰 Gruppenkasse
 
-Keine echten Finanzdaten oder persönlichen Daten einer Gruppe als gemeinsame Datenbank betrachten. Eine spätere Mehrnutzer-Version braucht Authentifizierung, Datenbank, Sicherheitsregeln und Datenschutzdokumentation.
+Vier Schnellaktionen: Bon scannen, Ausgabe, Einzahlung, Ausgleich. Die Personenübersicht zeigt Guthaben und Schulden inklusive vereinfachter Überweisungs-Vorschläge.
 
-FestivalCrew ist ein unabhängiges Fan-Planungsprojekt und nicht offiziell mit Wacken Open Air verbunden.
+## 🔒 Grenzen der Demo
+
+**Kein Mehrbenutzerbetrieb:** Alle Festivaldaten liegen ausschließlich im lokalen Speicher des jeweiligen Browsers. Es gibt noch keine Benutzerkonten, keine gemeinsame Echtzeit-Datenbank, keinen gemeinsamen Chat, keinen automatischen Datenabgleich und keinen Wacken-Import. Daten können beim Löschen der Browserdaten verloren gehen; nutze regelmäßig Export unter Einstellungen.
+
+Die OCR-Funktion lädt Programmdateien aus dem Internet, verarbeitet Bilder aber im Browser. Deshalb keine Geheimnisse im Code hinterlegen und keine sensiblen Gruppenbuchungen als bereits synchronisiert betrachten.
+
+## Entwicklung
+
+- privates Haupt-Repository: `FestivalCrew`
+- öffentliches Web-Deployment: `FestivalCrew-Web`
+- Stack: HTML/CSS/JavaScript, PWA, GitHub Pages
+- Gestaltung: dunkler Rock-/Festival-Look mit Rot, Anthrazit und kupferfarbenen Akzenten
