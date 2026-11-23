@@ -52,14 +52,13 @@ const store=lines.slice(0,5).find(x=>x.length>2&&x.length<46&&!/\d{2}[.,]\d{2}/.
 let items=[];
 for(let i=0;i<lines.length;i++){
  const line=lines[i];
- if(SKIP.test(line)||TOTAL.test(line)||/^[-=*_\s]+$/.test(line)||/\b(?:mwst|ust\.?)\s*\d+\s*%/i.test(line))continue;
+ if(/\\b\\d{2}[./-]\\d{2}[./-]\\d{2,4}\\b/.test(line)||SKIP.test(line)||TOTAL.test(line)||/^[-=*_\s]+$/.test(line)||/\b(?:mwst|ust\.?)\s*\d+\s*%/i.test(line))continue;
  const amounts=[...line.matchAll(MONEY)].filter(m=>!/[a-z]/i.test(line[m.index+m[0].length]||''));
  if(!amounts.length)continue;
  const last=amounts[amounts.length-1],price=amount(last[1]);
  if(price<=0||price>9999)continue;
  let title=line.slice(0,last.index).replace(/(?:\s+\d{1,5}[,.]\d{2})+\s*$/g,'').trim();
- if(!title&&i>0&&!SKIP.test(lines[i-1])&&!TOTAL.test(lines[i-1])&&!MONEY.test(lines[i-1]))title=lines[i-1];
- MONEY.lastIndex=0;
+ if(!title)continue;
  title=title.replace(/^\d{8,14}\s+/,'').replace(/\s+[a-d]\s*$/i,'').trim();
  let qty=1,qtyPrefix=title.match(/^(\d{1,3})\s*(?:x|×)\s*(.+)$/i);
  if(qtyPrefix){qty=Math.max(1,Math.min(999,Number(qtyPrefix[1])));title=qtyPrefix[2].trim();}
