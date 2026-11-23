@@ -1,26 +1,23 @@
-# FestivalCrew 0.3.1 – Fokus-Ansicht
+# FestivalCrew 0.4.0 — BLACK STAGE 🤘
 
-Die mobile Festivalplanungs-Demo bleibt übersichtlich, wirkt aber wärmer: tiefes Anthrazit, cremefarbener Text, gedämpftes Kupferrot und ein sanfter Bühnenlicht-Schimmer statt vieler bunter Kacheln. **Unabhängiges Fan-Projekt, kein offizielles Wacken-Angebot.**
+Diese Version bringt einen deutlich rockigeren Festival-Look, ohne die App wieder unübersichtlich zu machen.
 
-## Einfacher Aufbau
+## Design
+- Fast schwarzer Bühnenhintergrund, dunkle Poster-Oberflächen und ein kräftiger roter Akzent.
+- Headliner-Typografie, Lichtschein, fein strukturierter Hintergrund und kantige Bedienelemente.
+- Neue App-Ikone mit Blitzmotiv; keine Wacken-Logos oder fremde Markenzeichen.
+- Nur vier Hauptbereiche: **Übersicht**, **Listen**, **Kasse**, **Festival**.
 
-- **Übersicht:** Anzahl offener Einkäufe, offene Packaufgaben, Festivalkasse, nächste Aktionen und kommender Konzerttermin.
-- **Listen:** Einkaufsliste (offen/gekauft/alle) und Packliste (offen/gepackt/alle) in einem Bereich; Formulare nur bei Bedarf aufklappen.
-- **Kasse:** Ein gemeinsamer Kassenstand, Bon scannen, Ausgabe, Einzahlung und Ausgleich. Details zu Personen, Bons und Buchungen sind einklappbar.
-- **Festival:** Timeline und lokaler Chat als zwei Unteransichten.
-- **Einstellungen:** Festival- und Mitgliederverwaltung, Export/Import, Daten zurücksetzen.
+## Funktionen
+- **Übersicht:** offene Einkäufe, offene Packaufgaben, gemeinsame Festivalkasse, nächste Aktionen.
+- **Listen:** Einkaufen und Packen mit Status-Filtern; neue Einträge über aufklappbare Formulare.
+- **Kasse:** Bon scannen, Ausgabe, Einzahlung, Ausgleich und ausklappbare Buchungshistorie.
+- **Festival:** Timeline und lokaler Chat als Unterbereiche.
+- **Bon-Erkennung:** kostenlose Texterkennung im Browser; Artikel und Beträge müssen kontrolliert werden.
 
-## Kassenbon
+## Weiterhin eine Testversion
+Die Daten liegen **ausschließlich lokal im Browser**. Kein echter gemeinsamer Gruppenchat, keine Online-Synchronisierung und keine offizielle Wacken-Anbindung. Export der Daten unter **Einstellungen**. Das lokale Speicherformat bleibt bei diesem Designupdate unverändert.
 
-Kassenbon fotografieren, Positionen im Browser erkennen, prüfen, mit der Einkaufsliste abgleichen und optional in die Kasse übernehmen. Einzelartikel, Mengen und Preise können fehlerhaft erkannt werden und müssen vor dem Speichern geprüft werden. Beim Scan werden die OCR-Bibliothek und ggf. Sprachdaten online geladen; die Bildverarbeitung läuft im Browser.
+GitHub Pages: https://rasha9311-cyber.github.io/FestivalCrew-Web/
 
-## Grenzen der Testversion
-
-- Daten aus früheren Testversionen bleiben erhalten: Der Browser-Speicherschlüssel wurde **nicht geändert**.
-- Noch **keine Synchronisierung zwischen mehreren Handys**, kein gemeinsamer Echtzeit-Chat und keine offiziellen Wacken-Spielplandaten.
-- Lokale Daten können beim Löschen der Browserdaten verloren gehen. In Einstellungen eine JSON-Sicherung exportieren.
-- Keine persönliche oder gemeinsame Geldabrechnung als verifiziert betrachten; es handelt sich um einen Prototyp.
-
-Öffentliche Demo: https://rasha9311-cyber.github.io/FestivalCrew-Web/
-
-Änderungsdatum: 2026-11-23
+Dieses Projekt ist unabhängig von Wacken Open Air.

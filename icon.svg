@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="FestivalCrew">
- <defs>
-  <linearGradient id="back" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#3b2927"/><stop offset="1" stop-color="#171213"/></linearGradient>
- </defs>
- <rect width="512" height="512" rx="108" fill="#171213"/>
- <rect x="16" y="16" width="480" height="480" rx="92" fill="url(#back)" stroke="#5a413d" stroke-width="5"/>
- <text x="252" y="301" text-anchor="middle" fill="#f4e6d9" font-size="178" font-weight="800" font-family="Arial,Helvetica,sans-serif" letter-spacing="-13">FC</text>
- <rect x="164" y="357" width="184" height="12" rx="6" fill="#b26856"/>
- </svg>
+<defs><linearGradient id="back" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#34141e"/><stop offset=".52" stop-color="#140e13"/><stop offset="1" stop-color="#070709"/></linearGradient><linearGradient id="red" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f34b59"/><stop offset="1" stop-color="#901929"/></linearGradient></defs>
+<rect width="512" height="512" rx="94" fill="#080809"/>
+<rect x="12" y="12" width="488" height="488" rx="82" fill="url(#back)" stroke="#85303f" stroke-width="10"/>
+<path d="M363 44L218 246h80L175 453l31-147h-80L259 44Z" fill="url(#red)" opacity=".66"/>
+<path d="M94 130h324v16H94zm0 235h324v16H94z" fill="#f14a59" opacity=".75"/>
+<text x="256" y="320" text-anchor="middle" fill="#fff4ee" font-family="Impact,'Arial Narrow',Arial,sans-serif" font-size="188" font-style="italic" font-weight="900" letter-spacing="-16" stroke="#120a0f" stroke-width="7" paint-order="stroke">FC</text>
+<path d="M100 405h86m31 0h128m28 0h38" fill="none" stroke="#ec3c50" stroke-width="10" stroke-linecap="square"/>
+</svg>
