@@ -1,5 +1,5 @@
-const CACHE='festivalcrew-v0.2.0';
-const ASSETS=['./','./index.html','./rock.css','./receipt-tools.js','./manifest.webmanifest','./icon.svg'];
+const CACHE='festivalcrew-v0.3.0';
+const ASSETS=['./','./index.html','./minimal.css','./receipt-tools.js','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',event=>{
  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)));
  self.skipWaiting();

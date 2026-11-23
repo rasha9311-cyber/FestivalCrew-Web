@@ -1,38 +1,26 @@
-# 🤘 FestivalCrew Web – Rock Edition v0.2.0
+# FestivalCrew 0.3.0 – Fokus-Ansicht
 
-Die öffentliche, installierbare Demo für Festivalplanung mit Einkaufsliste, Festivalkasse, Packliste, Band-Timeline und lokalem Gruppenchat. FestivalCrew ist **kein offizielles Wacken-Produkt**.
+Die mobile Festivalplanungs-Demo ist bewusst minimalistisch: dunkles Grau, klare Typografie, nur ein dezenter roter Akzent. **Unabhängiges Fan-Projekt, kein offizielles Wacken-Angebot.**
 
-## 📱 Öffnen
+## Einfacher Aufbau
 
-https://rasha9311-cyber.github.io/FestivalCrew-Web/
+- **Übersicht:** Anzahl offener Einkäufe, offene Packaufgaben, Festivalkasse, nächste Aktionen und kommender Konzerttermin.
+- **Listen:** Einkaufsliste (offen/gekauft/alle) und Packliste (offen/gepackt/alle) in einem Bereich; Formulare nur bei Bedarf aufklappen.
+- **Kasse:** Ein gemeinsamer Kassenstand, Bon scannen, Ausgabe, Einzahlung und Ausgleich. Details zu Personen, Bons und Buchungen sind einklappbar.
+- **Festival:** Timeline und lokaler Chat als zwei Unteransichten.
+- **Einstellungen:** Festival- und Mitgliederverwaltung, Export/Import, Daten zurücksetzen.
 
-Updates erscheinen automatisch über GitHub Actions und GitHub Pages. Bei alter Anzeige die Seite neu laden.
+## Kassenbon
 
-## 🧾 Kassenbon-Scanner
+Kassenbon fotografieren, Positionen im Browser erkennen, prüfen, mit der Einkaufsliste abgleichen und optional in die Kasse übernehmen. Einzelartikel, Mengen und Preise können fehlerhaft erkannt werden und müssen vor dem Speichern geprüft werden. Beim Scan werden die OCR-Bibliothek und ggf. Sprachdaten online geladen; die Bildverarbeitung läuft im Browser.
 
-- Foto aufnehmen oder aus Galerie wählen
-- Browser-Texterkennung mit Tesseract.js (Bibliothek und Sprachdaten werden über CDN geladen)
-- Positionen mit Artikelnamen, Mengen, Preisen und vorgeschlagenen Listen-Zuordnungen erkennen
-- **Vor dem Speichern** alle Positionen kontrollieren und manuell korrigieren
-- Neu gekaufte Artikel zur Einkaufsliste hinzufügen oder bestehende Artikel als gekauft / teilweise gekauft markieren
-- Den Betrag als Ausgabe der Festivalkasse buchen, auf ausgewählte Personen aufteilen oder lediglich archivieren
-- Originalfoto und erkannte Positionen auf diesem Gerät speichern
+## Grenzen der Testversion
 
-OCR-Erkennung ist heuristisch und kann Positionen, Pfand, Rabatte oder Beträge falsch lesen. Es werden keine Kartendaten automatisch extrahiert oder geprüft.
+- Daten aus früheren Testversionen bleiben erhalten: Der Browser-Speicherschlüssel wurde **nicht geändert**.
+- Noch **keine Synchronisierung zwischen mehreren Handys**, kein gemeinsamer Echtzeit-Chat und keine offiziellen Wacken-Spielplandaten.
+- Lokale Daten können beim Löschen der Browserdaten verloren gehen. In Einstellungen eine JSON-Sicherung exportieren.
+- Keine persönliche oder gemeinsame Geldabrechnung als verifiziert betrachten; es handelt sich um einen Prototyp.
 
-## 💰 Gruppenkasse
+Öffentliche Demo: https://rasha9311-cyber.github.io/FestivalCrew-Web/
 
-Vier Schnellaktionen: Bon scannen, Ausgabe, Einzahlung, Ausgleich. Die Personenübersicht zeigt Guthaben und Schulden inklusive vereinfachter Überweisungs-Vorschläge.
-
-## 🔒 Grenzen der Demo
-
-**Kein Mehrbenutzerbetrieb:** Alle Festivaldaten liegen ausschließlich im lokalen Speicher des jeweiligen Browsers. Es gibt noch keine Benutzerkonten, keine gemeinsame Echtzeit-Datenbank, keinen gemeinsamen Chat, keinen automatischen Datenabgleich und keinen Wacken-Import. Daten können beim Löschen der Browserdaten verloren gehen; nutze regelmäßig Export unter Einstellungen.
-
-Die OCR-Funktion lädt Programmdateien aus dem Internet, verarbeitet Bilder aber im Browser. Deshalb keine Geheimnisse im Code hinterlegen und keine sensiblen Gruppenbuchungen als bereits synchronisiert betrachten.
-
-## Entwicklung
-
-- privates Haupt-Repository: `FestivalCrew`
-- öffentliches Web-Deployment: `FestivalCrew-Web`
-- Stack: HTML/CSS/JavaScript, PWA, GitHub Pages
-- Gestaltung: dunkler Rock-/Festival-Look mit Rot, Anthrazit und kupferfarbenen Akzenten
+Änderungsdatum: 2026-11-23

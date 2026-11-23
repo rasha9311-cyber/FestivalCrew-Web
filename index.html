@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0f1014">
+<meta name="theme-color" content="#0d0e10">
 <meta name="description" content="FestivalCrew – gemeinsam planen, einkaufen, packen und feiern.">
 <link rel="manifest" href="manifest.webmanifest">
 <title>FestivalCrew – Festivalplanung</title>
@@ -14,21 +14,23 @@
 @media(max-width:720px){.header{padding:17px 16px 8px}.headline h1{font-size:22px}.festival{margin:10px 15px 16px;padding:14px}.nav{display:none}.content{padding:0 15px 110px}.bottom-nav{display:grid;grid-template-columns:repeat(6,1fr);position:fixed;bottom:0;left:0;right:0;z-index:15;background:#17191ff2;backdrop-filter:blur(15px);border-top:1px solid #45454d;padding:8px 6px calc(8px + env(safe-area-inset-bottom))}.bottom-nav button{display:grid;gap:4px;justify-items:center;align-items:center;border:none;background:none;color:#9296a3;font-size:10px;min-width:0}.bottom-nav button .ico{font-size:19px}.bottom-nav button.active{color:#ff7188}.metric{padding:11px}.metric b{font-size:16px}.metric small{font-size:10px}.page-title h2{font-size:20px}.row.mobile-wrap{flex-wrap:wrap}.footer{padding-bottom:90px}}
 @media(max-width:350px){.bottom-nav button{font-size:8px}.bottom-nav button .ico{font-size:16px}.metric b{font-size:14px}}
 </style>
-<link rel="stylesheet" href="./rock.css?v=0.2.0">
+<link rel="stylesheet" href="./minimal.css?v=0.3.0">
 </head>
 <body>
 <div class="app">
-<header class="header"><div class="mark">🤘</div><div class="headline"><div class="eyebrow">DEIN FESTIVAL. DEINE CREW.</div><h1>FestivalCrew</h1></div><button class="icon-button" id="settingsBtn" aria-label="Einstellungen">☰</button></header>
-<section class="festival"><div><h2 id="festivalName">Wacken – Crew</h2><p id="festivalInfo">Gemeinsam planen. Zusammen feiern.</p></div><span class="pill">🎸 Festivalmodus</span></section>
+<header class="header"><div class="mark" aria-hidden="true">FC</div><div class="headline"><div class="eyebrow">EURE FESTIVALPLANUNG</div><h1>FestivalCrew</h1></div><button class="icon-button" id="settingsBtn" aria-label="Einstellungen">☰</button></header>
+<section class="festival"><div><h2 id="festivalName">Wacken – Crew</h2><p id="festivalInfo">Deine Planung</p></div><span class="pill">Crew</span></section>
 <nav class="nav" id="desktopNav"></nav><main class="content" id="main"></main>
-<footer class="footer">FestivalCrew 0.2.0 · Handy-Prototyp · Kein offizielles Wacken-Angebot</footer>
+<footer class="footer">FestivalCrew 0.3.0 · Lokale Testversion · Unabhängiges Projekt</footer>
 <nav class="bottom-nav" id="mobileNav"></nav></div>
 <div id="dialog" class="hidden"></div>
 <script src="./receipt-tools.js?v=0.2.0"></script>
 <script>
 (()=>{'use strict';
 const KEY='festivalcrew-prototype-0.1.0';
-const tabs=[['home','👥','Gruppe'],['shop','🛒','Einkaufen'],['money','💰','Kasse'],['pack','🎒','Packen'],['lineup','🎸','Timeline'],['chat','💬','Chat']];
+const tabs=[['home','⌂','Übersicht'],['shop','☷','Listen'],['money','€','Kasse'],['lineup','▤','Festival']];
+const navKey=id=>id==='pack'?'shop':id==='chat'?'lineup':id;
+const sectionTabs=area=>{const opts=area==='lists'?[['shop','Einkaufen'],['pack','Packen']]:[['lineup','Timeline'],['chat','Chat']];return `<div class="segmented" role="group" aria-label="Bereich auswählen">${opts.map(x=>`<button type="button" data-tab="${x[0]}" class="${active===x[0]?'active':''}" aria-pressed="${active===x[0]}">${x[1]}</button>`).join('')}</div>`};
 const uuid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 const fresh=()=>({festival:{name:'Wacken – unsere Crew',date:'',members:[{id:'me',name:'Ich'},{id:'crew1',name:'Mitglied 2'},{id:'crew2',name:'Mitglied 3'}]},shopping:[],packing:[],ledger:[],timeline:[],chat:[],receipts:[]});
 let state;try{state=JSON.parse(localStorage.getItem(KEY))||fresh()}catch{state=fresh()};
@@ -39,15 +41,94 @@ const mname=id=>state.festival.members.find(m=>m.id===id)?.name||'Unbekannt';
 const opts=(chosen='me')=>state.festival.members.map(m=>`<option value="${esc(m.id)}" ${chosen===m.id?'selected':''}>${esc(m.name)}</option>`).join('');
 const allchecks=()=>state.festival.members.map(m=>`<label class="member-chip"><input type="checkbox" name="participants" value="${esc(m.id)}" checked> ${esc(m.name)}</label>`).join('');
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(state));return true}catch(e){alert('Lokaler Speicher ist voll. Bitte ältere Kassenbonbilder löschen oder Daten exportieren.');return false}};
-let active='home';let notice='';let moneyEditor='';
-const navbar=()=>tabs.map(t=>`<button type="button" data-tab="${t[0]}" class="${active===t[0]?'active':''}"><span class="ico">${t[1]}</span><span>${t[2]}</span></button>`).join('');
+let active='home';let notice='';let moneyEditor='';let listView='open';let packView='open';
+const navbar=()=>tabs.map(t=>`<button type="button" data-tab="${t[0]}" class="${navKey(active)===t[0]?'active':''}" aria-current="${navKey(active)===t[0]?'page':'false'}"><span class="ico" aria-hidden="true">${t[1]}</span><span>${t[2]}</span></button>`).join('');
 const title=(s,info)=>`<div class="page-title"><div><h2>${s}</h2><p>${info}</p></div></div>`;
 const empty=(emoji,txt)=>`<div class="empty"><div class="emoji">${emoji}</div><p>${txt}</p></div>`;
 const memberOptions=id=>opts(id);
-const summary=()=>{let bought=state.shopping.filter(x=>x.bought).length,packed=state.packing.filter(x=>x.done).length;return `<div class="summary"><div class="metric"><small>Erledigte Einkäufe</small><b>${bought} / ${state.shopping.length}</b></div><div class="metric"><small>Gepackt</small><b>${packed} / ${state.packing.length}</b></div><div class="metric"><small>Bandtermine</small><b class="red">${state.timeline.length}</b></div></div>`};
-function home(){let d=state.festival;return title('Eure Festivalgruppe','Alle Vorbereitungen an einem Ort')+`<div class="stack"><div class="card"><div class="row between"><h3>🤘 ${esc(d.name)}</h3><span class="badge">${d.members.length} Leute</span></div><div class="column">${d.members.map(x=>`<div class="row"><span class="avatar">${esc(x.name.slice(0,1).toUpperCase())}</span><b>${esc(x.name)}</b>${x.id==='me'?'<span class="tag">Du</span>':''}</div>`).join('')}</div><hr><div class="row mobile-wrap"><button class="action secondary" data-modal="member">+ Mitglied hinzufügen</button><button class="ghost" data-modal="festival">Festival bearbeiten</button></div></div>${summary()}<div class="card"><h3>🧭 Schnellzugriff</h3><div class="row wrap"><button class="action" data-tab="shop">🛒 Einkäufe</button><button class="action secondary" data-tab="money">💰 Gruppenkasse</button><button class="action secondary" data-tab="lineup">🎸 Timeline</button></div></div><div class="notice">Diese Version speichert Daten nur auf deinem Handy. Mitgliederliste und Chat sind zurzeit eine lokale Demo; andere Personen sehen Änderungen noch nicht. Sichere Cloud-Synchronisierung folgt in einem späteren Schritt.</div></div>`;}
-function shop(){let total=state.shopping.reduce((a,x)=>a+n(x.price)*n(x.qty),0);return title('Einkaufsliste','Was brauchen wir noch – und was ist schon gekauft?')+`<div class="stack two"><div class="stack"><div class="summary"><div class="metric"><small>Artikel</small><b>${state.shopping.length}</b></div><div class="metric"><small>Gekauft</small><b class="green">${state.shopping.filter(x=>x.bought).length}</b></div><div class="metric"><small>Listenwert</small><b>${eur(total)}</b></div></div><div class="card"><div class="row between mobile-wrap"><h3>🛒 Gemeinsame Liste</h3><button type="button" class="action secondary" data-modal="receipt">🧾 Bon scannen</button></div>${state.shopping.length?state.shopping.map(x=>`<div class="list-row"><input class="check" type="checkbox" data-check="shop" data-id="${x.id}" ${x.bought?'checked':''}><div class="grow"><div class="item-title ${x.bought?'done':''}">${esc(x.title)}</div><div class="small muted">${esc(x.qty)} × ${esc(x.unit)} · ${esc(mname(x.owner))}</div>${x.bought?'<div class="carry-info">✅ Bereits gekauft</div>':n(x.boughtQty)>0?`<div class="carry-info">🟡 ${esc(x.boughtQty)} von ${esc(x.qty)} gekauft</div>`:'<div class="carry-info">◯ Noch offen</div>'}</div><div class="right"><b>${eur(n(x.price)*n(x.qty))}</b><div><button class="ghost mini" data-delete="shop" data-id="${x.id}">Löschen</button></div></div></div>`).join(''):empty('🛍️','Eure Liste ist noch leer.')}</div></div><div class="card"><h3>+ Artikel hinzufügen</h3><form id="shopForm" class="form-grid"><div class="field wide"><label>Artikel</label><input name="title" required maxlength="100" placeholder="z. B. Wasser, Grillfleisch, Pavillon"></div><div class="field"><label>Menge</label><input name="qty" type="number" min="0.1" step="0.1" value="1" required></div><div class="field"><label>Einheit</label><select name="unit"><option>Stück</option><option>Kiste</option><option>Packung</option><option>Flasche</option><option>kg</option><option>Liter</option></select></div><div class="field"><label>Preis pro Einheit (€)</label><input name="price" type="number" min="0" step="0.01" value="0"></div><div class="field"><label>Wer besorgt's?</label><select name="owner">${opts()}</select></div><div class="btn-row"><button class="action">Eintragen</button></div></form></div></div>`;}
-function pack(){return title('Packliste','Was muss unbedingt mit?')+`<div class="stack two"><div class="card"><h3>🎒 Alles im Blick</h3>${state.packing.length?state.packing.map(x=>`<div class="list-row"><input class="check" type="checkbox" data-check="pack" data-id="${x.id}" ${x.done?'checked':''}><div class="grow"><div class="item-title ${x.done?'done':''}">${esc(x.title)}</div><div class="small muted">${esc(x.category)} · ${esc(mname(x.owner))}</div></div><button class="ghost mini" data-delete="pack" data-id="${x.id}">Löschen</button></div>`).join(''):empty('⛺','Noch keine Sachen eingetragen.')}</div><div class="card"><h3>+ Zur Liste</h3><form id="packForm" class="form-grid"><div class="field wide"><label>Was soll mit?</label><input name="title" maxlength="100" required placeholder="z. B. Zelt, Gaskocher, Regenjacke"></div><div class="field"><label>Kategorie</label><select name="category"><option>Camping</option><option>Kleidung</option><option>Verpflegung</option><option>Technik</option><option>Hygiene</option><option>Sonstiges</option></select></div><div class="field"><label>Wer kümmert sich?</label><select name="owner">${opts()}</select></div><div class="btn-row"><button class="action">Hinzufügen</button></div></form></div></div>`;}
+const outstanding=()=>({
+ buy:state.shopping.filter(x=>!x.bought).length,
+ pack:state.packing.filter(x=>!x.done).length
+});
+function home(){
+ const d=state.festival,open=outstanding(),fund=ledgerStats().fund,total=open.buy+open.pack;
+ const soon=[...state.timeline].filter(x=>x.start&&new Date(x.start)>=new Date()).sort((a,b)=>a.start.localeCompare(b.start))[0];
+ const next=soon?soon.band+' · '+new Date(soon.start).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):null;
+ return title('Übersicht','Nur das, was jetzt wichtig ist')+
+ '<div class="stack">'+
+ `<section class="card overview-hero">
+ <small>NOCH ZU ERLEDIGEN</small><strong>${total===0?'Alles im Blick':total+' offene Punkte'}</strong>
+ <p class="sub">${total===0?'Keine offenen Einträge in euren Listen.':(open.buy+' Einkäufe offen · '+open.pack+' Dinge noch nicht gepackt')}</p>
+ <div class="overview-actions"><button type="button" class="action" data-modal="receipt">Bon scannen</button><button type="button" class="action secondary" data-tab="shop">Listen öffnen</button></div>
+ </section>
+ <div class="slim-stats" aria-label="Status">
+ <div class="slim-stat"><small>Einkaufen offen</small><strong>${open.buy}</strong></div>
+ <div class="slim-stat"><small>Packen offen</small><strong>${open.pack}</strong></div>
+ <div class="slim-stat"><small>Festivalkasse</small><strong>${eur(fund)}</strong></div>
+ </div>
+ <section class="card"><h3>Als Nächstes</h3><div class="task-links">
+ <button type="button" class="task-link" data-tab="shop"><span><b>Einkäufe prüfen</b><small>${open.buy?open.buy+' noch nicht vollständig gekauft':'Alles auf der Liste abgehakt'}</small></span><span class="arrow" aria-hidden="true">›</span></button>
+ <button type="button" class="task-link" data-tab="pack"><span><b>Packliste prüfen</b><small>${open.pack?open.pack+' noch nicht gepackt':'Alles eingepackt'}</small></span><span class="arrow" aria-hidden="true">›</span></button>
+ <button type="button" class="task-link" data-tab="lineup"><span><b>Festivalplan</b><small>${next?esc(next):'Noch keine kommenden Auftritte geplant'}</small></span><span class="arrow" aria-hidden="true">›</span></button>
+ </div></section>
+ <div class="mobile-note">Diese Testversion speichert deine Daten nur auf diesem Gerät. Die gemeinsame Synchronisierung folgt später.</div>
+ </div>`;
+}
+
+
+function shop(){
+ const open=state.shopping.filter(x=>!x.bought).length,bought=state.shopping.filter(x=>x.bought).length;
+ const visible=state.shopping.filter(x=>listView==='all'||(listView==='bought'?x.bought:!x.bought));
+ const status=x=>x.bought?'Gekauft':n(x.boughtQty)>0?n(x.boughtQty)+' / '+n(x.qty)+' gekauft':'Offen';
+ return title('Listen','Einkäufe und Ausrüstung an einem Ort')+sectionTabs('lists')+`<div class="stack">
+ <div class="card">
+ <div class="section-line"><div><h3>Einkaufsliste</h3><div class="small muted">${open} offen · ${bought} erledigt</div></div>
+ <button type="button" class="action secondary" data-modal="receipt">Bon scannen</button></div>
+ <div class="filter-bar" role="group" aria-label="Einkäufe filtern">
+ <button type="button" data-filter="shop:open" class="${listView==='open'?'active':''}" aria-pressed="${listView==='open'}">Offen</button>
+ <button type="button" data-filter="shop:bought" class="${listView==='bought'?'active':''}" aria-pressed="${listView==='bought'}">Gekauft</button>
+ <button type="button" data-filter="shop:all" class="${listView==='all'?'active':''}" aria-pressed="${listView==='all'}">Alle</button></div>
+ ${visible.length?visible.map(x=>`<div class="list-row">
+ <input class="check" aria-label="${esc(x.title)} gekauft" type="checkbox" data-check="shop" data-id="${esc(x.id)}" ${x.bought?'checked':''}>
+ <div class="grow"><div class="item-title ${x.bought?'done':''}">${esc(x.title)}</div>
+ <div class="small muted">${esc(x.qty)} × ${esc(x.unit)} · ${esc(mname(x.owner))}</div>
+ <div class="carry-info">${esc(status(x))}</div></div>
+ <div class="right"><div class="small">${eur(n(x.price)*n(x.qty))}</div><button class="ghost mini" type="button" data-delete="shop" data-id="${esc(x.id)}">Löschen</button></div>
+ </div>`).join(''):empty('',state.shopping.length?(listView==='open'?'Alles eingekauft.':listView==='bought'?'Noch nichts vollständig gekauft.':'Keine Einträge.'):'Noch keine Artikel auf der Liste.')}
+ </div>
+ <details class="details-panel"><summary>Artikel hinzufügen</summary>
+ <form id="shopForm" class="form-grid">
+ <div class="field wide"><label>Artikel</label><input name="title" required maxlength="100" placeholder="z. B. Wasser, Grillfleisch"></div>
+ <div class="field"><label>Menge</label><input name="qty" type="number" min="0.1" step="0.1" value="1" required></div>
+ <div class="field"><label>Einheit</label><select name="unit"><option>Stück</option><option>Kiste</option><option>Packung</option><option>Flasche</option><option>kg</option><option>Liter</option></select></div>
+ <div class="field"><label>Preis pro Einheit (€)</label><input name="price" type="number" min="0" step="0.01" value="0"></div>
+ <div class="field"><label>Wer besorgt es?</label><select name="owner">${opts()}</select></div>
+ <div class="btn-row"><button class="action">Speichern</button></div></form>
+ </details></div>`;
+}
+function pack(){
+ const open=state.packing.filter(x=>!x.done).length;
+ const visible=state.packing.filter(x=>packView==='all'||(packView==='done'?x.done:!x.done));
+ return title('Listen','Einkäufe und Ausrüstung an einem Ort')+sectionTabs('lists')+`<div class="stack">
+ <div class="card"><div class="section-line"><div><h3>Packliste</h3><div class="small muted">${open} offen · ${state.packing.length-open} erledigt</div></div></div>
+ <div class="filter-bar" role="group" aria-label="Packliste filtern">
+ <button type="button" data-filter="pack:open" class="${packView==='open'?'active':''}">Offen</button>
+ <button type="button" data-filter="pack:done" class="${packView==='done'?'active':''}">Gepackt</button>
+ <button type="button" data-filter="pack:all" class="${packView==='all'?'active':''}">Alle</button></div>
+ ${visible.length?visible.map(x=>`<div class="list-row">
+ <input class="check" aria-label="${esc(x.title)} gepackt" type="checkbox" data-check="pack" data-id="${esc(x.id)}" ${x.done?'checked':''}>
+ <div class="grow"><div class="item-title ${x.done?'done':''}">${esc(x.title)}</div><div class="small muted">${esc(x.category)} · ${esc(mname(x.owner))}</div></div>
+ <button class="ghost mini" type="button" data-delete="pack" data-id="${esc(x.id)}">Löschen</button></div>`).join(''):empty('',state.packing.length?'Hier ist gerade alles erledigt.':'Noch keine Sachen eingetragen.')}
+ </div>
+ <details class="details-panel"><summary>Zur Packliste hinzufügen</summary>
+ <form id="packForm" class="form-grid">
+ <div class="field wide"><label>Gegenstand</label><input name="title" maxlength="100" required placeholder="z. B. Zelt, Regenjacke"></div>
+ <div class="field"><label>Kategorie</label><select name="category"><option>Camping</option><option>Kleidung</option><option>Verpflegung</option><option>Technik</option><option>Hygiene</option><option>Sonstiges</option></select></div>
+ <div class="field"><label>Wer bringt es mit?</label><select name="owner">${opts()}</select></div>
+ <div class="btn-row"><button class="action">Hinzufügen</button></div></form>
+ </details></div>`;
+}
+
 const ledgerStats=()=>{let fund=0,balances={};state.festival.members.forEach(m=>balances[m.id]=0);for(let x of state.ledger){if(x.type==='deposit')fund+=n(x.amount);else if(x.type==='expense'&&x.mode==='fund')fund-=n(x.amount);else if(x.type==='expense'){const people=(x.participants||[]).filter(id=>Object.hasOwn(balances,id));if(!people.length)continue;balances[x.payer]=(balances[x.payer]||0)+n(x.amount);for(let id of people)balances[id]-=n(x.amount)/people.length;}else if(x.type==='settlement'){balances[x.from]=(balances[x.from]||0)+n(x.amount);balances[x.to]=(balances[x.to]||0)-n(x.amount);}}return {fund,balances};};
 function suggestTransfers(balances){
  const pos=Object.entries(balances).filter(([,x])=>x>0.009).map(([id,v])=>({id,c:Math.round(v*100)})).sort((a,b)=>b.c-a.c);
@@ -57,10 +138,10 @@ function suggestTransfers(balances){
  return out;
 }
 function money(){
- let stats=ledgerStats();
- let spent=state.ledger.filter(x=>x.type==='expense').reduce((s,x)=>s+n(x.amount),0);
- let rec=state.receipts,transfers=suggestTransfers(stats.balances),kind=moneyEditor;
- const labels={expense:'➖ Ausgabe eintragen',deposit:'➕ Geld einzahlen',settlement:'↔️ Zahlung ausgleichen'};
+ const stats=ledgerStats();
+ const spent=state.ledger.filter(x=>x.type==='expense').reduce((sum,x)=>sum+n(x.amount),0);
+ const rec=state.receipts,transfers=suggestTransfers(stats.balances),kind=moneyEditor;
+ const labels={expense:'Ausgabe eintragen',deposit:'Einzahlung',settlement:'Ausgleich'};
  const entry=kind?`<div class="card"><div class="row between"><h3>${labels[kind]}</h3><button class="ghost mini" type="button" data-money-action="close">Schließen ×</button></div>
  <form id="moneyForm" class="form-grid">
  <input type="hidden" name="type" id="moneyType" value="${esc(kind)}">
@@ -70,62 +151,106 @@ function money(){
  <div class="field wide" id="modeField"><label>Wie soll abgerechnet werden?</label><select name="mode" id="moneyMode"><option value="split">Unter ausgewählten Freunden aufteilen</option><option value="fund">Aus gemeinsamer Festivalkasse</option></select></div>
  <div class="field wide" id="participantsField"><label>Wer beteiligt sich?</label><div class="row wrap">${allchecks()}</div></div>
  <div class="field wide" id="toField"><label>Wer bekommt das Geld?</label><select name="to">${opts(state.festival.members[1]?.id||'me')}</select></div>
- <div class="btn-row"><button class="action">💾 Speichern</button></div>
- </form></div>`:`<div class="money-callout"><b>Einfach auswählen, was du machen möchtest.</b><div class="hint">Beim Bon-Scan kannst du gleichzeitig Artikel zur Einkaufsliste übernehmen.</div></div>`;
- return title('Gruppenkasse','Bon scannen · Einkauf aufteilen · Guthaben sehen')+
- `<div class="stack">
- <div class="summary"><div class="metric"><small>Festivalkasse</small><b class="${stats.fund>=0?'green':'red'}">${eur(stats.fund)}</b></div><div class="metric"><small>Ausgaben</small><b>${eur(spent)}</b></div><div class="metric"><small>Kassenbons</small><b>${rec.length}</b></div></div>
- <div class="card"><h3>⚡ Schnell erfassen</h3><div class="money-quick">
- <button class="action" data-modal="receipt" type="button">🧾 Bon scannen</button>
- <button class="action secondary" data-money-action="expense" type="button">➖ Ausgabe</button>
- <button class="action positive" data-money-action="deposit" type="button">➕ Einzahlung</button>
- <button class="action neutral" data-money-action="settlement" type="button">↔️ Ausgleich</button></div></div>
+ <div class="btn-row"><button class="action">Speichern</button></div>
+ </form></div>`:'';
+ return title('Kasse','Alle Beträge an einem Ort')+`<div class="stack">
+ <section class="card overview-hero"><small>GEMEINSAME FESTIVALKASSE</small><strong>${eur(stats.fund)}</strong>
+ <p class="sub">${eur(spent)} Gesamtausgaben · ${rec.length} Kassenbons</p>
+ <div class="overview-actions"><button class="action" type="button" data-modal="receipt">Bon scannen</button></div></section>
+ <section class="card"><h3>Weitere Buchung</h3><div class="money-quick">
+ <button type="button" class="action secondary" data-money-action="expense">Ausgabe</button>
+ <button type="button" class="action secondary" data-money-action="deposit">Einzahlung</button>
+ <button type="button" class="action secondary" data-money-action="settlement">Ausgleich</button>
+ </div></section>
  ${entry}
- <div class="stack two">
- <div class="card"><h3>⚖️ Wer bekommt noch Geld?</h3>
- ${transfers.length?transfers.map(x=>`<div class="list-row"><div class="grow"><b>${esc(mname(x.from))}</b> <span class="muted">zahlt an</span> <b>${esc(mname(x.to))}</b></div><b class="success">${eur(x.amount)}</b></div>`).join(''):`<p class="hint">Noch keine offenen Beträge zwischen euren Freunden.</p>`}
- <hr><h3>👥 Personenübersicht</h3>${Object.entries(stats.balances).map(([id,v])=>`<div class="list-row"><div class="grow"><b>${esc(mname(id))}</b><div class="small muted">${Math.abs(v)<.01?'Ausgeglichen':v>0?'Bekommt noch Geld':'Muss noch Geld zahlen'}</div></div><b class="${v>0?'success':v<0?'red':''}">${eur(v)}</b></div>`).join('')}</div>
- <div class="card"><h3>🧾 Kassenbons & gekaufte Artikel</h3>
- ${rec.length?rec.slice().reverse().map(x=>`<div class="list-row"><div class="grow"><b>${esc(x.shop||'Einkauf')}</b><div class="small muted">${esc(x.date||'')} · ${eur(x.amount)} · ${(x.items||[]).length} Positionen</div>${x.items?.length?`<div class="carry-info">${esc(x.items.slice(0,4).map(i=>i.title).join(', '))}${x.items.length>4?' …':''}</div>`:''}</div><div class="right"><button type="button" class="ghost mini" data-view-receipt="${x.id}">Details</button><button type="button" class="ghost mini" data-delete="receipt" data-id="${x.id}">×</button></div></div>`).join(''):empty('📃','Noch kein Kassenbon erfasst.')}
- </div></div>
- <div class="card"><h3>📒 Letzte Buchungen</h3>
- ${state.ledger.length?state.ledger.slice().reverse().map(x=>`<div class="list-row"><div class="grow"><b>${esc(x.title)}</b><div class="small muted">${x.type==='deposit'?'Einzahlung':x.type==='settlement'?'Ausgleich':x.mode==='fund'?'Festivalkasse':'Aufgeteilt'} · ${esc(mname(x.payer||x.from))} · ${new Date(x.created).toLocaleDateString('de-DE')}</div></div><b>${eur(x.amount)}</b><button class="ghost mini" data-delete="ledger" data-id="${x.id}">×</button></div>`).join(''):empty('💶','Noch keine Buchungen.')}
- </div></div>`;
+ <details class="details-panel">
+ <summary>Offene Ausgleiche (${transfers.length})</summary>
+ ${transfers.length?transfers.map(x=>`<div class="list-row"><div class="grow"><b>${esc(mname(x.from))}</b> zahlt an <b>${esc(mname(x.to))}</b></div><b>${eur(x.amount)}</b></div>`).join(''):'<p class="hint">Niemand schuldet aktuell jemandem Geld.</p>'}
+ <h3>Personenübersicht</h3>
+ ${Object.entries(stats.balances).map(([id,v])=>`<div class="list-row"><div class="grow"><b>${esc(mname(id))}</b><div class="small muted">${Math.abs(v)<.01?'Ausgeglichen':v>0?'Bekommt Geld':'Muss zahlen'}</div></div><b>${eur(v)}</b></div>`).join('')}
+ </details>
+ <details class="details-panel">
+ <summary>Kassenbons (${rec.length})</summary>
+ ${rec.length?rec.slice().reverse().map(x=>`<div class="list-row"><div class="grow"><b>${esc(x.shop||'Einkauf')}</b><div class="small muted">${esc(x.date||'')} · ${eur(x.amount)} · ${(x.items||[]).length} Positionen</div></div>
+ <button type="button" class="ghost mini" data-view-receipt="${esc(x.id)}">Ansehen</button>
+ <button type="button" class="ghost mini" data-delete="receipt" data-id="${esc(x.id)}">×</button></div>`).join(''):'<p class="hint">Noch kein Bon gespeichert.</p>'}
+ </details>
+ <details class="details-panel">
+ <summary>Buchungsverlauf (${state.ledger.length})</summary>
+ ${state.ledger.length?state.ledger.slice().reverse().map(x=>`<div class="list-row"><div class="grow"><b>${esc(x.title)}</b>
+ <div class="small muted">${x.type==='deposit'?'Einzahlung':x.type==='settlement'?'Ausgleich':x.mode==='fund'?'Festivalkasse':'Aufgeteilt'} · ${esc(mname(x.payer||x.from))} · ${new Date(x.created).toLocaleDateString('de-DE')}</div></div><b>${eur(x.amount)}</b><button type="button" class="ghost mini" data-delete="ledger" data-id="${esc(x.id)}">×</button></div>`).join(''):'<p class="hint">Noch keine Buchungen.</p>'}
+ </details>
+ </div>`;
 }
 
 const tval=x=>x?.replace('T',' ')||'';
-function lineup(){const sorted=[...state.timeline].sort((a,b)=>(a.start||'').localeCompare(b.start||''));return title('Festival-Timeline','Zusammen zu euren Lieblingsbands')+`<div class="stack two"><div class="card"><h3>🎤 Konzertplan</h3>${sorted.length?sorted.map(x=>{const overlaps=sorted.filter(y=>y.id!==x.id&&y.start&&x.start&&y.start<x.end&&x.start<y.end);return `<div class="list-row"><div class="grow"><div class="item-title">${esc(x.band)}</div><div class="small muted">${esc(tval(x.start))} – ${esc((x.end||'').slice(11))} · ${esc(x.stage||'Bühne offen')}</div><div class="small">👥 ${esc((x.participants||[]).map(mname).join(', ')||'Niemand')}</div>${overlaps.length?`<div class="split-overlap">⚠️ Überschneidung mit ${esc(overlaps.map(y=>y.band).join(', '))}</div>`:''}</div><button class="ghost mini" data-delete="lineup" data-id="${x.id}">×</button></div>`}).join(''):empty('🎸','Füge eure ersten Bands hinzu.')}</div><div class="card"><h3>+ Band einplanen</h3><form id="lineupForm" class="form-grid"><div class="field wide"><label>Band / Auftritt</label><input name="band" maxlength="90" required placeholder="Bandname"></div><div class="field"><label>Beginn</label><input type="datetime-local" name="start" required></div><div class="field"><label>Ende</label><input type="datetime-local" name="end" required></div><div class="field wide"><label>Bühne</label><input name="stage" maxlength="80" placeholder="z. B. Faster Stage"></div><div class="field wide"><label>Wer möchte mit?</label><div class="row wrap">${allchecks()}</div></div><div class="btn-row"><button class="action">Zur Timeline</button></div></form><p class="hint">Bandtermine werden hier manuell eingetragen. Es besteht noch keine Verbindung zur offiziellen Wacken-Running-Order.</p></div></div>`;}
-function chat(){return title('Gruppenchat','Absprachen, Ideen und Treffpunkte')+`<div class="stack"><div class="notice">💬 <b>Demomodus:</b> Nachrichten werden nur auf diesem Gerät gespeichert. Für einen echten Gruppenchat brauchen wir später Benutzerkonten und Echtzeit-Synchronisierung.</div><div class="card"><div class="chat-window" id="chatWindow">${state.chat.length?state.chat.map(x=>`<div class="bubble ${x.sender==='me'?'me':''}"><small>${esc(mname(x.sender))} · ${new Date(x.created).toLocaleString('de-DE',{dateStyle:'short',timeStyle:'short'})}</small><p>${esc(x.message)}</p></div>`).join(''):empty('💬','Hier beginnt euer Festivalchat.')}</div><form id="chatForm" class="row" style="margin-top:12px"><input name="message" required maxlength="1500" aria-label="Nachricht" placeholder="Nachricht schreiben…" style="flex:1;min-width:0;background:#101117;border:1px solid #454650;border-radius:10px;padding:12px;color:#fff"><button class="action">Senden</button></form></div></div>`;}
-function render(){let d=state.festival;$('#festivalName').textContent=d.name;$('#festivalInfo').textContent=(d.date?new Date(d.date+'T12:00:00').toLocaleDateString('de-DE')+' · ':'')+d.members.length+' Mitglieder · Deine Planung';$('#desktopNav').innerHTML=navbar();$('#mobileNav').innerHTML=navbar();$('#main').innerHTML=({home,shop,money,pack,lineup,chat}[active]||home)();if(active==='money')toggleMoney();if(active==='chat'){let el=$('#chatWindow');el.scrollTop=el.scrollHeight;}}
+function lineup(){
+ const sorted=[...state.timeline].sort((a,b)=>(a.start||'').localeCompare(b.start||''));
+ return title('Festival','Timeline und Crew-Absprachen')+sectionTabs('festival')+`<div class="stack">
+ <div class="card"><div class="section-line"><h3>Eure Konzertplanung</h3><span class="small muted">${sorted.length} Termine</span></div>
+ ${sorted.length?sorted.map(x=>{
+  const overlaps=sorted.filter(y=>y.id!==x.id&&y.start&&x.start&&y.start<x.end&&x.start<y.end);
+  return `<div class="list-row"><div class="grow">
+   <div class="item-title">${esc(x.band)}</div>
+   <div class="small muted">${esc(tval(x.start))} – ${esc((x.end||'').slice(11))} · ${esc(x.stage||'Bühne offen')}</div>
+   <div class="small muted">${esc((x.participants||[]).map(mname).join(', ')||'Noch niemand')}</div>
+   ${overlaps.length?`<div class="split-overlap">Überschneidung mit ${esc(overlaps.map(y=>y.band).join(', '))}</div>`:''}
+   </div><button class="ghost mini" data-delete="lineup" data-id="${esc(x.id)}">×</button></div>`;
+ }).join(''):empty('','Noch keine Bands eingetragen.')}
+ </div>
+ <details class="details-panel"><summary>Band oder Termin hinzufügen</summary>
+ <form id="lineupForm" class="form-grid">
+ <div class="field wide"><label>Band / Auftritt</label><input name="band" maxlength="90" required placeholder="Name der Band"></div>
+ <div class="field"><label>Beginn</label><input type="datetime-local" name="start" required></div>
+ <div class="field"><label>Ende</label><input type="datetime-local" name="end" required></div>
+ <div class="field wide"><label>Bühne</label><input name="stage" maxlength="80" placeholder="z. B. Faster Stage"></div>
+ <div class="field wide"><label>Wer möchte mit?</label><div class="row wrap">${allchecks()}</div></div>
+ <div class="btn-row"><button class="action">Termin speichern</button></div></form></details>
+ <div class="mobile-note">Bandtermine werden hier manuell eingetragen. Keine Verbindung zur offiziellen Wacken-Running-Order.</div>
+ </div>`;
+}
+function chat(){
+ return title('Festival','Timeline und Crew-Absprachen')+sectionTabs('festival')+`<div class="stack">
+ <div class="mobile-note">Chat-Testversion: Nachrichten sind nur auf diesem Gerät zu sehen. Ein gemeinsamer Chat ist noch nicht aktiv.</div>
+ <div class="card"><h3>Nachrichten</h3>
+ <div class="chat-window" id="chatWindow">${state.chat.length?state.chat.map(x=>`<div class="bubble ${x.sender==='me'?'me':''}"><small>${esc(mname(x.sender))} · ${new Date(x.created).toLocaleString('de-DE',{dateStyle:'short',timeStyle:'short'})}</small><p>${esc(x.message)}</p></div>`).join(''):empty('','Hier beginnt euer Chat.')}
+ </div><form id="chatForm" class="row" style="margin-top:12px">
+ <input name="message" required maxlength="1500" aria-label="Nachricht" placeholder="Nachricht schreiben…" style="flex:1;min-width:0;background:#121417;border:1px solid #383d44;border-radius:9px;padding:12px;color:#f1f1f1">
+ <button class="action">Senden</button></form></div></div>`;
+}
+
+function render(){let d=state.festival;$('#festivalName').textContent=d.name;$('#festivalInfo').textContent=(d.date?new Date(d.date+'T12:00:00').toLocaleDateString('de-DE')+' · ':'')+d.members.length+' Personen · nur auf diesem Gerät';$('#desktopNav').innerHTML=navbar();$('#mobileNav').innerHTML=navbar();$('#main').innerHTML=({home,shop,money,pack,lineup,chat}[active]||home)();if(active==='money')toggleMoney();if(active==='chat'){let el=$('#chatWindow');el.scrollTop=el.scrollHeight;}}
 function dialog(content){$('#dialog').className='modal-bg';$('#dialog').innerHTML=`<div class="modal" role="dialog" aria-modal="true">${content}</div>`;}
 function close(){let el=$('#dialog');el.className='hidden';el.innerHTML='';}
 function receiptModal(){
- dialog(`<div class="row between"><h2>🧾 Bon scannen & zuordnen</h2><button class="icon-button" data-close>×</button></div>
- <div class="notice"><b>So geht's:</b> Bon fotografieren → Artikel erkennen → Liste prüfen → speichern. Die Texterkennung arbeitet im Browser; dafür wird eine Bibliothek online geladen. Artikel und Beträge bitte vor dem Speichern kontrollieren.</div>
- <form id="receiptForm" class="form-grid" style="margin-top:15px">
- <div class="field wide"><label>Kassenbon fotografieren oder Bild auswählen</label><input id="receiptImage" name="image" type="file" accept="image/*" capture="environment"></div>
- <div class="field wide"><div id="receiptThumb" class="row"></div>
- <button type="button" class="action" id="ocrBtn">⚡ Artikel vom Bon erkennen</button><span class="hint" id="ocrStatus">Erst ein Foto auswählen. Falls etwas fehlt, kannst du Artikel auch selbst ergänzen.</span></div>
- <div class="field wide"><h3>🛒 Was wurde gekauft?</h3>
- <div id="receiptItems" class="receipt-tools"><div class="receipt-empty">Noch keine Artikel erkannt. Scanne einen Bon oder füge Positionen manuell hinzu.</div></div>
- <button type="button" class="ghost" id="addReceiptItem">+ Artikel manuell hinzufügen</button>
- <div id="receiptSumCheck" class="hint"></div></div>
- <div class="field wide"><label>Geschäft</label><input name="shop" required maxlength="120" placeholder="z. B. REWE, Aldi oder Getränkemarkt"></div>
+ dialog(`<div class="row between"><h2>Bon scannen</h2><button class="icon-button" data-close aria-label="Schließen">×</button></div>
+ <p class="hint">Foto auswählen, Artikel erkennen, kurz prüfen und speichern.</p>
+ <form id="receiptForm" class="form-grid" style="margin-top:14px">
+ <div class="field wide"><label>Kassenbon-Foto</label><input id="receiptImage" name="image" type="file" accept="image/*" capture="environment"></div>
+ <div class="field wide"><div id="receiptThumb" class="row"></div><button type="button" class="action secondary" id="ocrBtn">Artikel erkennen</button>
+ <span class="hint" id="ocrStatus">Die Erkennung kann Fehler enthalten. Bitte vor dem Speichern prüfen.</span></div>
+ <div class="field wide"><h3>Gekaufte Artikel</h3><div id="receiptItems" class="receipt-tools"><div class="receipt-empty">Noch keine Artikel eingetragen.</div></div>
+ <button type="button" class="ghost" id="addReceiptItem">+ Artikel ergänzen</button><div id="receiptSumCheck" class="hint"></div></div>
+ <div class="field wide"><label>Geschäft</label><input name="shop" required maxlength="120" placeholder="z. B. REWE"></div>
  <div class="field"><label>Gesamtbetrag (€)</label><input name="amount" required type="number" step="0.01" min="0" placeholder="0,00"></div>
- <div class="field"><label>Einkaufsdatum</label><input name="date" type="date" value="${new Date().toISOString().slice(0,10)}"></div>
- <div class="field wide"><label>Wer hat bezahlt?</label><select name="payer">${opts()}</select></div>
- <div class="field wide"><label>Abrechnung</label><select id="receiptMode" name="mode">
- <option value="split">Unter ausgewählten Freunden aufteilen</option>
- <option value="fund">Aus der gemeinsamen Festivalkasse</option>
- <option value="none">Nur Bon und Einkaufsliste speichern</option>
- </select></div>
- <div class="field wide" id="receiptParticipantsField"><label>Wer beteiligt sich an den Kosten?</label><div class="row wrap">${allchecks()}</div></div>
- <div class="btn-row"><button class="action">✅ Bon und Einkauf speichern</button></div></form>`);
+ <div class="field wide"><label>In die Kasse übernehmen?</label><select id="receiptMode" name="mode">
+ <option value="none">Nein, nur Einkaufsliste aktualisieren</option>
+ <option value="fund">Ja, aus gemeinsamer Festivalkasse</option>
+ <option value="split">Ja, unter Freunden aufteilen</option></select></div>
+ <details class="details-panel" id="receiptExtra" style="grid-column:1/-1"><summary>Datum, Bezahler und Beteiligte</summary>
+ <div class="form-grid" style="padding-bottom:14px">
+ <div class="field"><label>Datum</label><input name="date" type="date" value="${new Date().toISOString().slice(0,10)}"></div>
+ <div class="field"><label>Bezahlt von</label><select name="payer">${opts()}</select></div>
+ <div class="field wide" id="receiptParticipantsField"><label>Wer beteiligt sich?</label><div class="row wrap">${allchecks()}</div></div>
+ </div></details>
+ <div class="btn-row"><button class="action">Bon speichern</button></div>
+ </form>`);
  renderReceiptItems();
  toggleReceiptMode();
 }
+
 function toggleReceiptMode(){
- $('#receiptParticipantsField')?.classList.toggle('hidden',$('#receiptMode')?.value!=='split');
+ const split=$('#receiptMode')?.value==='split';$('#receiptParticipantsField')?.classList.toggle('hidden',!split);if(split){let d=$('#receiptExtra');if(d)d.open=true}
 }
 function collectReceiptRows(){
  return [...document.querySelectorAll('#receiptItems .receipt-row')].map(row=>{
@@ -170,7 +295,23 @@ function receiptDetails(rec){
  <h3>Gekaufte Artikel</h3>${items||'<div class="hint">Bei diesem älteren Bon sind noch keine Einzelartikel gespeichert.</div>'}
  ${image?'<hr><h3>Bonfoto</h3>'+image:''}`;
 }
-function modal(type){if(type==='member'){dialog(`<div class="row between"><h2>👥 Mitglied hinzufügen</h2><button class="icon-button" data-close>×</button></div><form id="memberForm" class="column"><div class="field"><label>Name</label><input name="name" required maxlength="50" placeholder="Name der Person"></div><button class="action">Hinzufügen</button></form><p class="hint">Die Mitgliedernamen sind momentan nur auf diesem Gerät gespeichert.</p>`)}else if(type==='festival'){dialog(`<div class="row between"><h2>🎸 Festival bearbeiten</h2><button class="icon-button" data-close>×</button></div><form id="festivalForm" class="column"><div class="field"><label>Name</label><input name="name" required maxlength="100" value="${esc(state.festival.name)}"></div><div class="field"><label>Startdatum (optional)</label><input name="date" type="date" value="${esc(state.festival.date)}"></div><button class="action">Speichern</button></form>`)}else if(type==='settings'){dialog(`<div class="row between"><h2>⚙️ Einstellungen</h2><button class="icon-button" data-close>×</button></div><div class="column"><p>FestivalCrew Version 0.2.0</p><div class="notice">🔒 <b>Datenschutz dieser Demo:</b> Angaben und Fotos liegen ausschließlich im lokalen Gerätespeicher. Noch keine Cloud-Verbindung, keine automatische Sicherung und kein echter Gruppenchat.</div><button class="action secondary" id="exportBtn">⬇️ Daten als JSON sichern</button><label class="action secondary" style="text-align:center;cursor:pointer">⬆️ Sicherung importieren<input type="file" id="importInput" accept="application/json,.json" class="hidden"></label><button class="danger" id="resetBtn">Lokale Daten zurücksetzen</button></div>`)}else if(type==='receipt'){receiptModal()} }
+function modal(type){if(type==='member'){dialog(`<div class="row between"><h2>👥 Mitglied hinzufügen</h2><button class="icon-button" data-close>×</button></div><form id="memberForm" class="column"><div class="field"><label>Name</label><input name="name" required maxlength="50" placeholder="Name der Person"></div><button class="action">Hinzufügen</button></form><p class="hint">Die Mitgliedernamen sind momentan nur auf diesem Gerät gespeichert.</p>`)}else if(type==='festival'){dialog(`<div class="row between"><h2>🎸 Festival bearbeiten</h2><button class="icon-button" data-close>×</button></div><form id="festivalForm" class="column"><div class="field"><label>Name</label><input name="name" required maxlength="100" value="${esc(state.festival.name)}"></div><div class="field"><label>Startdatum (optional)</label><input name="date" type="date" value="${esc(state.festival.date)}"></div><button class="action">Speichern</button></form>`)}else if(type==='settings'){dialog(`
+ <div class="row between"><h2>Einstellungen</h2><button class="icon-button" data-close>×</button></div>
+ <div class="column">
+ <div class="card"><h3>Festivalgruppe</h3>
+ <div class="small muted">${esc(state.festival.name)} · ${state.festival.members.length} Personen</div>
+ <div class="row wrap" style="margin-top:11px"><button type="button" class="action secondary" data-modal="festival">Festival bearbeiten</button>
+ <button type="button" class="ghost" data-modal="member">Mitglied hinzufügen</button></div>
+ <div class="small muted" style="margin-top:8px">${esc(state.festival.members.map(m=>m.name).join(', '))}</div>
+ </div>
+ <div class="card"><h3>Datensicherung</h3>
+ <p class="hint">In dieser Testversion werden deine Daten nur auf diesem Gerät gespeichert. Ein gemeinsamer Chat und eine Cloud-Verbindung existieren noch nicht.</p>
+ <button class="action secondary" id="exportBtn">Daten sichern</button>
+ <label class="ghost" style="text-align:center;cursor:pointer">Sicherung importieren<input type="file" id="importInput" accept="application/json,.json" class="hidden"></label>
+ </div>
+ <p class="mobile-note">FestivalCrew Version 0.3.0 · lokale Vorschau</p>
+ <button class="danger" id="resetBtn">Lokale Daten zurücksetzen</button>
+ </div>`)} else if(type==='receipt'){receiptModal()} }
 
 function toggleMoney(){let type=$('#moneyType')?.value, mode=$('#moneyMode')?.value;$('#modeField')?.classList.toggle('hidden',type!=='expense');$('#participantsField')?.classList.toggle('hidden',type!=='expense'||mode!=='split');$('#toField')?.classList.toggle('hidden',type!=='settlement');}
 function participants(form){return [...form.querySelectorAll('input[name="participants"]:checked')].map(x=>x.value)}
@@ -181,8 +322,9 @@ async function shrink(file){return await new Promise((resolve,reject)=>{let r=ne
 function loadOcr(){return new Promise((res,rej)=>{if(window.Tesseract)return res();let e=document.createElement('script');e.src='https://cdn.jsdelivr.net/npm/tesseract.js@6/dist/tesseract.min.js';e.onload=res;e.onerror=()=>rej(Error('Die Texterkennung konnte nicht geladen werden.'));document.head.appendChild(e);})}
 function moneyFromText(s){let lines=s.split(/\n/).map(t=>t.trim());let re=/(?:summe|gesamt|total|betrag|zu zahlen|endbetrag)/i, num=/(-?\d{1,5}[,.]\d{2})/g;let candidate=[];lines.forEach((t,i)=>{if(re.test(t)){let found=[...t.matchAll(num)];if(found.length)candidate.push(found.at(-1)[1]);else if(lines[i+1]){let found2=[...lines[i+1].matchAll(num)];if(found2.length)candidate.push(found2.at(-1)[1]);}}});return candidate.at(-1)||''}
 function toast(msg){notice=msg;let node=document.createElement('div');node.textContent=msg;node.style='position:fixed;z-index:100;bottom:85px;left:50%;transform:translateX(-50%);padding:12px 16px;border-radius:12px;background:#30323e;color:white;box-shadow:0 10px 30px #0008;max-width:85vw;text-align:center';document.body.append(node);setTimeout(()=>node.remove(),3200)}
-document.addEventListener('click',async(e)=>{let el=e.target.closest('[data-tab],[data-modal],[data-close],[data-delete],[data-view-receipt],[data-money-action],[data-remove-receipt-item],#addReceiptItem,#settingsBtn,#exportBtn,#resetBtn,#ocrBtn');if(!el)return;
+document.addEventListener('click',async(e)=>{let el=e.target.closest('[data-tab],[data-modal],[data-close],[data-delete],[data-view-receipt],[data-money-action],[data-remove-receipt-item],[data-filter],#addReceiptItem,#settingsBtn,#exportBtn,#resetBtn,#ocrBtn');if(!el)return;
 if(el.dataset.tab){active=el.dataset.tab;render();window.scrollTo(0,0)}
+ else if(el.dataset.filter){const [area,mode]=el.dataset.filter.split(':');if(area==='shop')listView=mode;else if(area==='pack')packView=mode;render()}
 else if(el.dataset.moneyAction){moneyEditor=el.dataset.moneyAction==='close'?'':el.dataset.moneyAction;active='money';render()}
  else if(el.dataset.modal){scannedFile=null;scannedData='';scannedItems=[];modal(el.dataset.modal)}
  else if(el.id==='addReceiptItem'){scannedItems=collectReceiptRows();scannedItems.push({title:'',qty:1,unitPrice:0,matchId:'new'});renderReceiptItems()}
@@ -242,7 +384,7 @@ else if(id==='receiptForm'){
  }
  close();scannedFile=null;scannedData='';scannedItems=[];
 }
-else return;if(id==='moneyForm')moneyEditor='';if(save()){render();toast(id==='receiptForm'?'Bon, Artikel und Kasse gespeichert ✓':'Gespeichert ✓')}}catch(err){console.error(err);alert('Konnte den Eintrag nicht speichern.')}});
+else return;if(id==='moneyForm')moneyEditor='';if(save()){if(id==='receiptForm'){active='shop';listView='bought'}if(id==='shopForm'){active='shop';listView='open'}if(id==='packForm'){active='pack';packView='open'}render();toast(id==='receiptForm'?'Bon, Artikel und Kasse gespeichert':'Gespeichert')}}catch(err){console.error(err);alert('Konnte den Eintrag nicht speichern.')}});
 $('#dialog').addEventListener('click',e=>{if(e.target===$('#dialog'))close()});
 render();if('serviceWorker' in navigator && location.protocol==='https:')navigator.serviceWorker.register('./sw.js').catch(()=>{});
 })();
